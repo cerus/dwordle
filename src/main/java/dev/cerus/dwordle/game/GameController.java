@@ -13,11 +13,11 @@ import net.jodah.expiringmap.ExpiringMap;
 
 public class GameController {
 
-    private final Map<Long, WordleGame> gameMap = new HashMap<>();
-    private final Map<Long, Message> messageMap = new HashMap<>();    private final Map<Long, Object> timeoutMap = ExpiringMap.builder()
+    private final Map<Long, WordleGame> gameMap = new HashMap<>();    private final Map<Long, Object> timeoutMap = ExpiringMap.builder()
             .expiration(TIMEOUT, TimeUnit.MINUTES)
             .expirationListener((o, o2) -> this.endGame((Long) o))
             .build();
+    private final Map<Long, Message> messageMap = new HashMap<>();
     private final WordService wordService;
     private final StatsService statsService;
     public GameController(final WordService wordService, final StatsService statsService) {

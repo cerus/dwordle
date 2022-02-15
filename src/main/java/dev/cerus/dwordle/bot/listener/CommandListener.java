@@ -39,9 +39,14 @@ public class CommandListener extends ListenerAdapter {
         }
     }
 
+    /**
+     * /wordle stats
+     *
+     * @param event The event
+     */
     private void handleStats(final SlashCommandEvent event) {
-        this.statsService.exec(() -> {
-            event.deferReply(true).queue(hook -> {
+        event.deferReply(true).queue(hook -> {
+            this.statsService.exec(() -> {
                 hook.editOriginal(new MessageBuilder().setEmbed(new EmbedBuilder()
                         .setTitle("DWordle Stats")
                         .setDescription("These are the DWordle statistics:")
@@ -74,6 +79,7 @@ public class CommandListener extends ListenerAdapter {
                             DWordle uses the same words as the original Wordle game.""")
                     .addField("DWordle on GitHub", "[Link](https://github.com/cerus/dwordle)", true)
                     .addField("Contact Cerus", "Cerus#5149", true)
+                    .addField("Servers", String.valueOf(event.getJDA().getGuilds().size()), true)
                     .setColor(Color.ORANGE)
                     .setFooter("DWordle - Made by Cerus", "https://cerus.dev/favicon.png")
                     .setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl())
