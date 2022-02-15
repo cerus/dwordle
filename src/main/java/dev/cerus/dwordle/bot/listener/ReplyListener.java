@@ -52,7 +52,7 @@ public class ReplyListener extends ListenerAdapter {
         // All good, process input
         this.gameController.handleInput(message.getAuthor().getIdLong(), input);
         if (message.getChannel() instanceof TextChannel) {
-            message.delete().queue();
+            message.delete().queueAfter(1, TimeUnit.SECONDS);
         }
     }
 

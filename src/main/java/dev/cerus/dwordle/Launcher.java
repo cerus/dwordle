@@ -60,7 +60,7 @@ public class Launcher {
         // Start presence update task
         executor.scheduleAtFixedRate(() -> {
             final long played = statsService.getAmountTotalGamesPlayed();
-            final long won = statsService.getAmountTotalGamesPlayed();
+            final long won = statsService.getAmountTotalGamesWon();
             final long lost = statsService.getAmountTotalGamesLost();
             bot.updateActivity(Activity.ActivityType.DEFAULT, played + " games / " + won + " won / " + lost + " lost");
         }, 0, 1, TimeUnit.MINUTES);
