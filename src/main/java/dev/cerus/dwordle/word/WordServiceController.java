@@ -25,4 +25,15 @@ public class WordServiceController {
         return this.wordServiceMap.get(name).getRandomSecretWord();
     }
 
+    public void close() throws Exception {
+        for (final WordService service : this.wordServiceMap.values()) {
+            service.close();
+        }
+        this.wordServiceMap.clear();
+    }
+
+    public boolean isValidWordList(String wordListName) {
+        return wordServiceMap.containsKey(wordListName);
+    }
+
 }

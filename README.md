@@ -1,6 +1,6 @@
 # dwordle
 
-Play Wordle in your Discord client
+Play Wordle in your Discord client. Supports multiple word lists (`official` and `german`)
 
 ## Invite the bot
 
@@ -14,7 +14,7 @@ All the commands work on servers and in direct messages.
 
 `/wordle stats`: Shows the DWordle stats
 
-`/wordle start`: Starts a new wordle game
+`/wordle start`: Starts a new wordle game with the specified word list (`official` if none is specified)
 
 `/wordle end`: Ends a running wordle game
 

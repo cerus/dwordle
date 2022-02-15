@@ -2,12 +2,14 @@ package dev.cerus.dwordle.bot.listener;
 
 import dev.cerus.dwordle.game.GameController;
 import dev.cerus.dwordle.stats.StatsService;
+import dev.cerus.dwordle.word.WordServiceController;
 import java.awt.Color;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,11 +18,16 @@ import org.jetbrains.annotations.NotNull;
 public class CommandListener extends ListenerAdapter {
 
     private final GameController gameController;
+    private final WordServiceController wordServiceController;
     private final StatsService statsService;
     private final long commandId;
 
-    public CommandListener(final GameController gameController, final StatsService statsService, final long commandId) {
+    public CommandListener(final GameController gameController,
+                           final WordServiceController wordServiceController,
+                           final StatsService statsService,
+                           final long commandId) {
         this.gameController = gameController;
+        this.wordServiceController = wordServiceController;
         this.statsService = statsService;
         this.commandId = commandId;
     }
@@ -76,7 +83,8 @@ public class CommandListener extends ListenerAdapter {
                     .setDescription("""
                             DWordle bot by [Cerus](https://cerus.dev)
 
-                            DWordle uses the same words as the original Wordle game.""")
+                            Available word lists: `official`, `german`
+                            DWordle uses the same words as the original Wordle game by default.""")
                     .addField("DWordle on GitHub", "[Link](https://github.com/cerus/dwordle)", true)
                     .addField("Contact Cerus", "Cerus#5149", true)
                     .addField("Servers", String.valueOf(event.getJDA().getGuilds().size()), true)
@@ -99,8 +107,20 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
+        System.out.println(event.getCommandPath());
+        for (final OptionMapping option : event.getOptions()) {
+            System.out.println("> " + option.getName() + ": " + option.getAsString());
+        }
+
+        final String wordListName = event.getOption("word-list") == null ? "official"
+                : event.getOption("word-list").getAsString();
+        if (!this.wordServiceController.isValidWordList(wordListName)) {
+            event.reply("Unknown word list").queue();
+            return;
+        }
+
         event.reply("Ok").queue();
-        this.gameController.startGame(user.getIdLong(), event.getChannel());
+        this.gameController.startGame(user.getIdLong(), event.getChannel(), wordListName);
     }
 
     /**

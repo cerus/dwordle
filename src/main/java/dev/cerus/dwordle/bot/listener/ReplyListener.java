@@ -1,7 +1,9 @@
 package dev.cerus.dwordle.bot.listener;
 
 import dev.cerus.dwordle.game.GameController;
+import dev.cerus.dwordle.game.WordleGame;
 import dev.cerus.dwordle.word.WordService;
+import dev.cerus.dwordle.word.WordServiceController;
 import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageType;
@@ -16,9 +18,9 @@ import org.jetbrains.annotations.NotNull;
 public class ReplyListener extends ListenerAdapter {
 
     private final GameController gameController;
-    private final WordService wordService;
+    private final WordServiceController wordService;
 
-    public ReplyListener(final GameController gameController, final WordService wordService) {
+    public ReplyListener(final GameController gameController, final WordServiceController wordService) {
         this.gameController = gameController;
         this.wordService = wordService;
     }
@@ -37,9 +39,12 @@ public class ReplyListener extends ListenerAdapter {
             return;
         }
 
+        // Get game
+        final WordleGame game = gameController.getGame(message.getAuthor().getIdLong());
+
         // Check input validity
         final String input = message.getContentStripped().toLowerCase().trim();
-        if (!this.wordService.isValidInput(input)) {
+        if (!this.wordService.isValidInput(game.getWordList(), input)) {
             message.reply("Invalid input").queue(msg ->
                     msg.delete().queueAfter(5, TimeUnit.SECONDS, v -> {
                         if (message.getChannel() instanceof TextChannel) {

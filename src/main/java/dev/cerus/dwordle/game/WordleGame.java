@@ -16,11 +16,13 @@ public class WordleGame {
 
     private final int[][] grid = new int[INPUT_AMOUNT][WORD_LENGTH];
     private final String[] inputs = new String[INPUT_AMOUNT];
+    private final String wordList;
     private final String secretWord;
     private int index;
     private boolean done;
 
-    public WordleGame(final String secretWord) {
+    public WordleGame(String wordList, final String secretWord) {
+        this.wordList = wordList;
         this.secretWord = secretWord.toLowerCase();
         this.index = 0;
         for (int i = 0; i < WORD_LENGTH; i++) {
@@ -130,6 +132,15 @@ public class WordleGame {
      */
     public String getInput(final int row) {
         return this.inputs[row];
+    }
+
+    /**
+     * Gets the word list name
+     *
+     * @return Word list name
+     */
+    public String getWordList() {
+        return wordList;
     }
 
     /**

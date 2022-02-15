@@ -6,6 +6,8 @@ import dev.cerus.dwordle.stats.SQLiteStatsService;
 import dev.cerus.dwordle.stats.StatsService;
 import dev.cerus.dwordle.word.NyTimesWordService;
 import dev.cerus.dwordle.word.WordService;
+import dev.cerus.dwordle.word.WordServiceController;
+import dev.cerus.dwordle.word.WordleAtWordService;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -20,9 +22,16 @@ public class Launcher {
 
     public static void main(final String[] args) {
         // Initialize words
-        final WordService wordService = new NyTimesWordService();
-        wordService.initialize().whenComplete((unused, throwable) -> {
-            log("Words initialized");
+        final WordServiceController wordServiceController = new WordServiceController();
+        final WordService officialWordService = new NyTimesWordService();
+        officialWordService.initialize().whenComplete((unused, throwable) -> {
+            wordServiceController.registerWordService("official", officialWordService);
+            log("Official words initialized");
+        });
+        final WordService germanWordService = new WordleAtWordService();
+        germanWordService.initialize().whenComplete((unused, throwable) -> {
+            wordServiceController.registerWordService("german", germanWordService);
+            log("German words initialized");
         });
 
         // Initialize stats
@@ -31,7 +40,7 @@ public class Launcher {
         statsService.initialize(executor);
 
         // Initialize game controller and bot
-        final GameController gameController = new GameController(wordService, statsService);
+        final GameController gameController = new GameController(wordServiceController, statsService);
         final DWordleBot bot = new DWordleBot();
 
         // Register shutdown hook
@@ -39,7 +48,7 @@ public class Launcher {
             try {
                 executor.shutdown();
                 statsService.close();
-                wordService.close();
+                wordServiceController.close();
                 bot.shutdown();
             } catch (final Exception e) {
                 e.printStackTrace();
@@ -49,7 +58,7 @@ public class Launcher {
 
         // Attempt to start bot
         try {
-            bot.initialize(System.getenv("TOKEN"), gameController, wordService, statsService);
+            bot.initialize(System.getenv("TOKEN"), gameController, wordServiceController, statsService);
         } catch (final LoginException | InterruptedException e) {
             e.printStackTrace();
             log("ERROR: Failed to initialize bot");

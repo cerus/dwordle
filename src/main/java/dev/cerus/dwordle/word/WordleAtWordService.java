@@ -56,16 +56,20 @@ public class WordleAtWordService implements WordService {
                 return;
             }
 
-            // Parse inputs and words
-            final String[] lines = response.split("\n");
-            final String encodedInputs = lines[1].substring(lines[1].indexOf("\"") + 1, lines[1].length() - 1);
-            final String encodedWords = lines[2].substring(lines[2].indexOf("\"") + 1, lines[2].length() - 1);
+            try {
+                // Parse inputs and words
+                final String[] lines = response.split("\n");
+                final String encodedInputs = lines[1].substring(lines[1].indexOf("\"") + 1, lines[1].length() - 2);
+                final String encodedWords = lines[2].substring(lines[2].indexOf("\"") + 1, lines[2].length() - 2);
 
-            // Decode inputs and words
-            this.inputs.addAll(this.decode(encodedInputs));
-            this.words.addAll(this.decode(encodedWords));
+                // Decode inputs and words
+                this.inputs.addAll(this.decode(encodedInputs));
+                this.words.addAll(this.decode(encodedWords));
 
-            future.complete(null);
+                future.complete(null);
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
         });
 
         return future;

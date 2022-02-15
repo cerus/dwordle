@@ -3,7 +3,7 @@ package dev.cerus.dwordle.game;
 import static dev.cerus.dwordle.Const.TIMEOUT;
 import dev.cerus.dwordle.bot.util.MessageUtil;
 import dev.cerus.dwordle.stats.StatsService;
-import dev.cerus.dwordle.word.WordService;
+import dev.cerus.dwordle.word.WordServiceController;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -13,15 +13,18 @@ import net.jodah.expiringmap.ExpiringMap;
 
 public class GameController {
 
-    private final Map<Long, WordleGame> gameMap = new HashMap<>();    private final Map<Long, Object> timeoutMap = ExpiringMap.builder()
+    private final Map<Long, Object> timeoutMap = ExpiringMap.builder()
             .expiration(TIMEOUT, TimeUnit.MINUTES)
             .expirationListener((o, o2) -> this.endGame((Long) o))
             .build();
+    private final Map<Long, WordleGame> gameMap = new HashMap<>();
     private final Map<Long, Message> messageMap = new HashMap<>();
-    private final WordService wordService;
+
+    private final WordServiceController wordServiceController;
     private final StatsService statsService;
-    public GameController(final WordService wordService, final StatsService statsService) {
-        this.wordService = wordService;
+
+    public GameController(final WordServiceController wordServiceController, final StatsService statsService) {
+        this.wordServiceController = wordServiceController;
         this.statsService = statsService;
     }
 
@@ -70,7 +73,10 @@ public class GameController {
         final Message message = this.messageMap.remove(userId);
 
         MessageUtil.sendGameEnded(userId, game, message);
-        this.statsService.exec(() -> this.statsService.gameLost(userId));
+        this.statsService.exec(() -> {
+            this.statsService.gamePlayed(userId);
+            this.statsService.gameLost(userId);
+        });
     }
 
     /**
@@ -79,9 +85,9 @@ public class GameController {
      * @param userId  The user
      * @param channel The channel where the game is going to be played
      */
-    public void startGame(final long userId, final MessageChannel channel) {
+    public void startGame(final long userId, final MessageChannel channel, String wordList) {
         this.timeoutMap.put(userId, new Object());
-        this.gameMap.put(userId, new WordleGame(this.wordService.getRandomSecretWord()));
+        this.gameMap.put(userId, new WordleGame(wordList, this.wordServiceController.getRandomSecretWord(wordList)));
 
         System.out.println(this.gameMap.get(userId).getSecretWord());
 
@@ -114,6 +120,15 @@ public class GameController {
         return this.messageMap.get(userId).getIdLong() == msgId;
     }
 
-
+    /**
+     * Get the running game of a user
+     *
+     * @param userId The user
+     *
+     * @return A game
+     */
+    public WordleGame getGame(long userId) {
+        return gameMap.get(userId);
+    }
 
 }
