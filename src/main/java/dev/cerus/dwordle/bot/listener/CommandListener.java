@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -105,11 +104,6 @@ public class CommandListener extends ListenerAdapter {
         if (this.gameController.hasGame(user.getIdLong())) {
             event.reply("You already have a game running.").queue();
             return;
-        }
-
-        System.out.println(event.getCommandPath());
-        for (final OptionMapping option : event.getOptions()) {
-            System.out.println("> " + option.getName() + ": " + option.getAsString());
         }
 
         final String wordListName = event.getOption("word-list") == null ? "official"
