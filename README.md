@@ -21,3 +21,6 @@ All the commands work on servers and in direct messages.
 ## Images
 
 ![Img](https://i.imgur.com/tgwU7pN.png)
+
+<!-- Hit counter -->
+<img src="https://track.cerus.dev/track/dwordle">
