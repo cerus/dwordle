@@ -42,7 +42,32 @@ public class CommandListener extends ListenerAdapter {
             case "end" -> this.handleEndGame(event);
             case "info" -> this.handleInfo(event);
             case "stats" -> this.handleStats(event);
+            case "help" -> this.handleHelp(event);
         }
+    }
+
+    /**
+     * /wordle help
+     *
+     * @param event The event
+     */
+    private void handleHelp(final SlashCommandEvent event) {
+        event.deferReply(true).queue(hook -> {
+            hook.editOriginal(new MessageBuilder().setEmbed(new EmbedBuilder()
+                    .setTitle("DWordle Bot Help")
+                    .setDescription("""
+                            DWordle commands:
+                                                        
+                            `/wordle info`: Shows bot info
+                            `wordle stats`: Shows DWordle stats
+                            `/wordle start`: Starts a wordle game
+                            `/wordle end`: Ends your running wordle game""")
+                    .addField("How do I submit guesses?", "Reply to the game message " +
+                            "with your guess. ([GIF](https://i.imgur.com/e3DDiP2.gif))", false)
+                    .setColor(new Color(127, 38, 146))
+                    .setFooter("DWordle - Made by Cerus", "https://cerus.dev/favicon.png")
+                    .build()).build()).queue();
+        });
     }
 
     /**
@@ -84,9 +109,10 @@ public class CommandListener extends ListenerAdapter {
 
                             Available word lists: `official`, `german`
                             DWordle uses the same words as the original Wordle game by default.""")
-                    .addField("DWordle on GitHub", "[Link](https://github.com/cerus/dwordle)", true)
+                    .addField("GitHub", "[Link](https://github.com/cerus/dwordle)", true)
                     .addField("Contact Cerus", "Cerus#5149", true)
                     .addField("Servers", String.valueOf(event.getJDA().getGuilds().size()), true)
+                    .addField("Tech", "Java 16, JDA framework", true)
                     .setColor(Color.ORANGE)
                     .setFooter("DWordle - Made by Cerus", "https://cerus.dev/favicon.png")
                     .setThumbnail(event.getJDA().getSelfUser().getEffectiveAvatarUrl())

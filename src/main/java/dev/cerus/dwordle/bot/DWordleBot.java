@@ -45,7 +45,8 @@ public class DWordleBot {
                                         "The word list that will be used for the game", false),
                         new SubcommandData("end", "End a game"),
                         new SubcommandData("info", "DWordle info"),
-                        new SubcommandData("stats", "DWordle stats")
+                        new SubcommandData("stats", "DWordle stats"),
+                        new SubcommandData("help", "DWordle help")
                 )).queue(command -> {
             // We need to know the id of the command, that's why we register the event listeners this late
             this.jda.addEventListener(
