@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -68,6 +69,20 @@ public class DWordleBot {
 
     public void shutdown() {
         this.jda.shutdown();
+    }
+
+    public long getId() {
+        return this.jda.getSelfUser().getIdLong();
+    }
+
+    public int countGuilds() {
+        return this.jda.getGuilds().size();
+    }
+
+    public int countUsers() {
+        return this.jda.getGuilds().stream()
+                .mapToInt(Guild::getMemberCount)
+                .sum();
     }
 
 }
