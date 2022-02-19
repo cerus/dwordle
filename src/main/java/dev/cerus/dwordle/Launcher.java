@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.security.auth.login.LoginException;
-import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.OnlineStatus;
 
 public class Launcher {
 
@@ -40,7 +40,7 @@ public class Launcher {
         });
 
         // Initialize stats
-        final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+        final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
         final StatsService statsService = new SQLiteStatsService();
         statsService.initialize(executor);
 
@@ -73,11 +73,28 @@ public class Launcher {
 
         // Start presence update task
         executor.scheduleAtFixedRate(() -> {
-            final long played = statsService.getAmountTotalGamesPlayed();
-            final long won = statsService.getAmountTotalGamesWon();
-            final long lost = statsService.getAmountTotalGamesLost();
-            bot.updateActivity(Activity.ActivityType.DEFAULT, played + " games / " + won + " won / " + lost + " lost");
+            if (bot.isSafeStopEnabled()) {
+                bot.updateActivity(OnlineStatus.DO_NOT_DISTURB, "Restarting, please wait...");
+            } else {
+                final long played = statsService.getAmountTotalGamesPlayed();
+                final long won = statsService.getAmountTotalGamesWon();
+                final long lost = statsService.getAmountTotalGamesLost();
+                bot.updateActivity(OnlineStatus.ONLINE, played + " games / " + won + " won / " + lost + " lost");
+            }
         }, 0, 1, TimeUnit.MINUTES);
+
+        // Safe stop task
+        executor.scheduleAtFixedRate(() -> {
+            if (!bot.isSafeStopEnabled()) {
+                return;
+            }
+            if (gameController.getRunningGames() > 0) {
+                return;
+            }
+            bot.getJda().getUserById(bot.getAdminUser()).openPrivateChannel()
+                    .queue(ch -> ch.sendMessage("Bot restarting")
+                            .queue(msg -> System.exit(0)));
+        }, 0, 20, TimeUnit.SECONDS);
 
         // Post bot stats
         executor.scheduleAtFixedRate(() -> {
@@ -96,6 +113,8 @@ public class Launcher {
                         bot.countUsers()
                 ).getBytes(StandardCharsets.UTF_8));
                 out.flush();
+
+                log("INFO: Stats posted with " + connection.getResponseCode());
             } catch (final IOException e) {
                 e.printStackTrace();
                 log("ERROR: Failed to post stats");

@@ -1,11 +1,13 @@
 package dev.cerus.dwordle.bot.listener;
 
+import dev.cerus.dwordle.bot.DWordleBot;
 import dev.cerus.dwordle.game.GameController;
 import dev.cerus.dwordle.stats.StatsService;
 import dev.cerus.dwordle.word.WordServiceController;
 import java.awt.Color;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -19,21 +21,21 @@ public class CommandListener extends ListenerAdapter {
     private final GameController gameController;
     private final WordServiceController wordServiceController;
     private final StatsService statsService;
-    private final long commandId;
+    private final DWordleBot bot;
 
     public CommandListener(final GameController gameController,
                            final WordServiceController wordServiceController,
                            final StatsService statsService,
-                           final long commandId) {
+                           final DWordleBot bot) {
         this.gameController = gameController;
         this.wordServiceController = wordServiceController;
         this.statsService = statsService;
-        this.commandId = commandId;
+        this.bot = bot;
     }
 
     @Override
     public void onSlashCommand(@NotNull final SlashCommandEvent event) {
-        if (event.getCommandIdLong() != this.commandId || event.getSubcommandName() == null) {
+        if (event.getCommandIdLong() != this.bot.getCommandId() || event.getSubcommandName() == null) {
             return;
         }
 
@@ -112,6 +114,10 @@ public class CommandListener extends ListenerAdapter {
                     .addField("GitHub", "[Link](https://github.com/cerus/dwordle)", true)
                     .addField("Contact Cerus", "Cerus#5149", true)
                     .addField("Servers", String.valueOf(event.getJDA().getGuilds().size()), true)
+                    .addField("Users", String.valueOf(event.getJDA().getGuilds().stream()
+                            .mapToInt(Guild::getMemberCount)
+                            .sum()), true)
+                    .addField("Running games", String.valueOf(this.gameController.getRunningGames()), true)
                     .addField("Tech", "Java 16, JDA framework", true)
                     .setColor(Color.ORANGE)
                     .setFooter("DWordle - Made by Cerus", "https://cerus.dev/favicon.png")
@@ -126,6 +132,18 @@ public class CommandListener extends ListenerAdapter {
      * @param event The command event
      */
     private void handleStartGame(final SlashCommandEvent event) {
+        if (this.bot.isSafeStopEnabled()) {
+            event.deferReply(true).queue(h -> h.editOriginal(new MessageBuilder()
+                    .setEmbed(new EmbedBuilder()
+                            .setTitle("You can't start a game right now")
+                            .setDescription("The bot is currently waiting for all running games " +
+                                    "to end in order to restart. Please wait a few minutes.")
+                            .setColor(Color.RED)
+                            .build())
+                    .build()).queue());
+            return;
+        }
+
         final User user = event.getUser();
         if (this.gameController.hasGame(user.getIdLong())) {
             event.reply("You already have a game running.").queue();

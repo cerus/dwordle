@@ -13,16 +13,13 @@ import net.jodah.expiringmap.ExpiringMap;
 
 public class GameController {
 
-    private final Map<Long, Object> timeoutMap = ExpiringMap.builder()
+    private final Map<Long, WordleGame> gameMap = new HashMap<>();    private final Map<Long, Object> timeoutMap = ExpiringMap.builder()
             .expiration(TIMEOUT, TimeUnit.MINUTES)
             .expirationListener((o, o2) -> this.endGame((Long) o))
             .build();
-    private final Map<Long, WordleGame> gameMap = new HashMap<>();
     private final Map<Long, Message> messageMap = new HashMap<>();
-
     private final WordServiceController wordServiceController;
     private final StatsService statsService;
-
     public GameController(final WordServiceController wordServiceController, final StatsService statsService) {
         this.wordServiceController = wordServiceController;
         this.statsService = statsService;
@@ -85,7 +82,7 @@ public class GameController {
      * @param userId  The user
      * @param channel The channel where the game is going to be played
      */
-    public void startGame(final long userId, final MessageChannel channel, String wordList) {
+    public void startGame(final long userId, final MessageChannel channel, final String wordList) {
         this.timeoutMap.put(userId, new Object());
         this.gameMap.put(userId, new WordleGame(wordList, this.wordServiceController.getRandomSecretWord(wordList)));
 
@@ -127,8 +124,14 @@ public class GameController {
      *
      * @return A game
      */
-    public WordleGame getGame(long userId) {
-        return gameMap.get(userId);
+    public WordleGame getGame(final long userId) {
+        return this.gameMap.get(userId);
     }
+
+    public int getRunningGames() {
+        return this.gameMap.size();
+    }
+
+
 
 }
