@@ -52,7 +52,8 @@ public class DWordleBot {
                 .upsertCommand(new CommandData("wordle-admin", "DWordle admin commands")
                         .setDefaultEnabled(false)
                         .addSubcommands(
-                                new SubcommandData("safestop", "Safely stop")
+                                new SubcommandData("safestop", "Safely stop"),
+                                new SubcommandData("guilds", "Show guilds")
                         )).queue(cmd -> {
                     this.adminCommandId = cmd.getIdLong();
                     this.jda.getGuildById(privateGuildId)

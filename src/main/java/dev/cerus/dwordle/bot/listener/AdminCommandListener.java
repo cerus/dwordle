@@ -2,6 +2,7 @@ package dev.cerus.dwordle.bot.listener;
 
 import dev.cerus.dwordle.bot.DWordleBot;
 import dev.cerus.dwordle.game.GameController;
+import java.util.stream.Collectors;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -31,14 +32,19 @@ public class AdminCommandListener extends ListenerAdapter {
 
         switch (event.getSubcommandName()) {
             case "safestop" -> this.handleSafeStop(event);
+            case "guilds" -> this.handleGuilds(event);
         }
+    }
+
+    private void handleGuilds(final SlashCommandEvent event) {
+        event.reply(event.getJDA().getGuilds().stream()
+                .map(guild -> "`" + guild.getName() + "` [" + guild.getMemberCount() + "]")
+                .collect(Collectors.joining(", "))).queue();
     }
 
     private void handleSafeStop(final SlashCommandEvent event) {
         event.reply("Ok").queue();
         this.bot.setSafeStopEnabled(true);
-        event.getJDA().getUserById(this.bot.getAdminUser()).openPrivateChannel()
-                .queue(ch -> ch.sendMessage("Safe stop enabled").queue());
     }
 
 }

@@ -91,9 +91,7 @@ public class Launcher {
             if (gameController.getRunningGames() > 0) {
                 return;
             }
-            bot.getJda().getUserById(bot.getAdminUser()).openPrivateChannel()
-                    .queue(ch -> ch.sendMessage("Bot restarting")
-                            .queue(msg -> System.exit(0)));
+            System.exit(0);
         }, 0, 20, TimeUnit.SECONDS);
 
         // Post bot stats
